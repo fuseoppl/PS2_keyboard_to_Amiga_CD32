@@ -17,7 +17,7 @@
 
 #define NOREPEATALL //The Amiga itself repeats the last key until this one is received with the "released" flag
 //#define SERIALDEBUGGER
-//#define ISR1BUGGER
+//#define ISR1DEBUGGER
 //#define NOACKDEBUGGER
 
 //DFRobot Beetle Board - compatible with Arduino Leonardo.
@@ -30,12 +30,12 @@
                      //Beetle Board                                            CD32, PS2 keyboard
                      // +                                                  <- Pin 4 (Amiga 6-Pin Mini-DIN) & PS2 keyboard Vcc
                      // -                                                  <-> Pin 3 (Amiga 3-Pin Mini-DIN) & PS2 keyboard gnd
-#define DATAPIN   11 //D11                                                 <-> PS2 keyboard data line
-#define IRQPIN     3 //SCL                                                 <-> PS2 keyboard clock line
-#define HANDSHAKE  2 //SDA & 4k7 (pullup to vcc) & anode schottky (SD2)    <-> Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
-#define KCLK      10 //D10 & cathode schottky (SD1) & 4k7 (pullup to vcc)
-#define KDAT       9 // D9 & cathode schottky (SD2)
-#define KCLKLOW    0 // RX &   anode schottky (SD1)                         <-> Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
+#define DATAPIN   11 // D11                                                <-> PS2 keyboard data line
+#define IRQPIN     3 // SCL                                                <-> PS2 keyboard clock line
+#define HANDSHAKE  2 // SDA & 4k7 (pullup to vcc) & anode schottky (SD2)   <-> Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
+#define KCLK      10 // D10 to cathode schottky (SD1)
+#define KDAT       9 // D9 to cathode schottky (SD2)
+#define KCLKLOW    0 // RX & 4k7 (pullup to vcc) & anode schottky (SD1)     <-> Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
 #define LED       13 //                                                      -> PS2 keyboard CapsLock LED
 
 const uint16_t    clockDelayFalling  = 10;  //us
@@ -73,8 +73,8 @@ void setup()
   digitalWrite(KDAT, HIGH);
   digitalWrite(LED, HIGH);
 
-  #if defined(SERIALDEBUGGER)
-  Serial.begin(115200);
+  #if defined(SERIALDEBUGGER || ISR1DEBUGGER)
+  Serial.begin(250000);
   #endif
 
   keyboard.begin(DATAPIN, IRQPIN);
@@ -172,9 +172,9 @@ void loop( )
     Serial.println(keystroke, HEX);
     #endif
 
-    if (keystroke == 0x2846 || keystroke == 0x3846)// ctrl + alt + delete
+    if (keystroke == 0x2846 || keystroke == 0x3846) // ctrl + alt + delete
     {
-      ResetAmiga();
+      ResetAmiga(false); //true = soft (ToDo), false = hard
     }
 
     if (keystroke == 0x295F || keystroke == 0x395F) // ctrl + alt + home
@@ -275,11 +275,11 @@ void Resync()
   attachInterrupt(digitalPinToInterrupt(KCLKLOW), ISR2, LOW);
 }
 
-void ResetAmiga()
+void ResetAmiga(bool resetRequest)
 {
   detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
   detachInterrupt(digitalPinToInterrupt(KCLKLOW));
-  resetRequest = true;  //use this in the future for Amiga "soft reset"
+  bool _resetRequest = resetRequest;  //use this in the future for Amiga "soft reset"
 
   //AMIGA HARD RESET
   digitalWrite(KCLK, LOW);
@@ -301,7 +301,7 @@ void ISR1()
 
   amigaACK = true;
 
-  #if defined(ISR1BUGGER)      
+  #if defined(ISR1DEBUGGER)      
   Serial.println("ISR1");
   #endif
 }
