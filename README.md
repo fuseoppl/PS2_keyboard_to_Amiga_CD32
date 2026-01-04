@@ -1,8 +1,8 @@
-# PS2 keyboard to Amiga CD32
+# PS/2 keyboard to Amiga CD32
 
-PS2 to Amiga keyboard translator tested on:
+PS/2 to Amiga keyboard translator tested on:
 - Amiga CD32
-- PS2 keyboard, Brand: Perixx, Model No.:PERIBOARD-409, Part No.:TK525P
+- PS/2 keyboard, Brand: Perixx, Model No.:PERIBOARD-409, Part No.:TK525P
 - DFRobot Beetle Board compatible with Arduino Leonardo
 
 Keys info:
@@ -25,9 +25,9 @@ and two diodes with a very low voltage drop, maximum 0.3V (eg.: BAS85-GS08).
 CapsLock LED:
 Unsolder the LED on the Beetle, cut off the CapsLock LED from the keyboard board and connect it to the Beetle LED pads.
 
-Beetle Board <-> Amiga, PS2 keyboard
-- '+' <- Pin 4 (CD32 6-Pin Mini-DIN) & PS2 keyboard Vcc
-- '-' <-> Pin 3 (CD32 3-Pin Mini-DIN) & PS2 keyboard gnd
+Beetle Board <-> Amiga, PS/2 keyboard
+- '+' <- Pin 4 (CD32 6-Pin Mini-DIN) & PS/2 keyboard Vcc
+- '-' <-> Pin 3 (CD32 3-Pin Mini-DIN) & PS/2 keyboard gnd
 - D11 <-> PS2 keyboard data line
 - SCL <-> PS2 keyboard clock line
 - SDA & anode schottky (SD2) <-> Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
