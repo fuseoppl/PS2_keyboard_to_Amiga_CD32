@@ -27,16 +27,16 @@
 //Unsolder the LED on the Beetle,
 //cut off the CapsLock LED from the keyboard board
 //and connect it to the Beetle LED pads.
-                     //Beetle Board                                            Amiga, PS2 keyboard
-                     // +                                                   <- Pin 4 (Amiga 6-Pin Mini-DIN) & PS2 keyboard Vcc
+                     //Beetle Board                                            CD32, PS2 keyboard
+                     // +                                                  <- Pin 4 (Amiga 6-Pin Mini-DIN) & PS2 keyboard Vcc
                      // -                                                  <-> Pin 3 (Amiga 3-Pin Mini-DIN) & PS2 keyboard gnd
 #define DATAPIN   11 //D11                                                 <-> PS2 keyboard data line
 #define IRQPIN     3 //SCL                                                 <-> PS2 keyboard clock line
-#define HANDSHAKE  2 //SDA & R_2 4k7 pullup to vcc & anode schottky D_2    <-> Pin 1 (Amiga 6-Pin Mini-DIN) keyboard data line
-#define KCLK      10 //D10 & cathode schottky D_1 & R_1 4k7 pullup to vcc
-#define KDAT       9 // D9 & cathode schottky D_2
-#define KCLKLOW    0 // RX &   anode schottky D_1                          <-> Pin 5 (Amiga 6-Pin Mini-DIN) keyboard clock line
-#define LED       13 //                                                     -> PS2 keyboard CapsLock LED
+#define HANDSHAKE  2 //SDA & 4k7 (pullup to vcc) & anode schottky (SD2)    <-> Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
+#define KCLK      10 //D10 & cathode schottky (SD1) & 4k7 (pullup to vcc)
+#define KDAT       9 // D9 & cathode schottky (SD2)
+#define KCLKLOW    0 // RX &   anode schottky (SD1)                         <-> Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
+#define LED       13 //                                                      -> PS2 keyboard CapsLock LED
 
 const uint16_t    clockDelayFalling  = 10;  //us
 const uint16_t    clockLowTime       = 20;  //us
@@ -191,7 +191,7 @@ void loop( )
       {
         digitalWrite(LED, !upDownFlag);
 
-        //freezes the keyboard or library when CapsLock pressed too often
+        //Freezes the keyboard when CapsLock pressed too often!
         /*
         if (upDownFlag == 0) 
         { 
