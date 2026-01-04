@@ -2,7 +2,7 @@
 
 PS/2 to Amiga keyboard translator tested on:
 - Amiga CD32
-- PS/2 keyboard, Brand: Perixx, Model No.:PERIBOARD-409, Part No.:TK525P
+- PS/2 keyboard, Brand: Perixx, Model No.:PERIBOARD-409P, Part No.:TK525P
 - DFRobot Beetle Board compatible with Arduino Leonardo
 
 Keys info:
