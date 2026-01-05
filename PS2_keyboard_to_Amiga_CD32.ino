@@ -189,8 +189,6 @@ void loop( )
 
       if (keyNr == PS2_KEY_CAPS)
       {
-        digitalWrite(LED, !upDownFlag);
-
         //Freezes the keyboard when CapsLock pressed too often!
         /*
         if (upDownFlag == 0) 
@@ -202,6 +200,8 @@ void loop( )
           keyboard.setLock(0); //CapsLock LED OFF
         }
         */
+        // instead of the keyboard LED, we will use the Beetle LED
+        digitalWrite(LED, !upDownFlag);
       }
 
       if (keyNr == 0x70) keyNr = 0;
