@@ -26,15 +26,15 @@ You need:
 CapsLock LED:
 * unsolder the LED on the Beetle, cut off the CapsLock LED from the keyboard board and connect it to the Beetle LED pads.
 
-Beetle Board <-> Amiga, PS/2 keyboard
-* '+' <- Pin 4 (CD32 6-Pin Mini-DIN) & PS/2 keyboard Vcc
-* '-' <-> Pin 3 (CD32 3-Pin Mini-DIN) & PS/2 keyboard gnd
-* D11 <-> PS2 keyboard data line
-* SCL <-> PS2 keyboard clock line
-* SDA & anode schottky (SD2) <-> Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
+Beetle Board ↔ Amiga, PS/2 keyboard
+* '+' ↔ Pin 4 (CD32 6-Pin Mini-DIN) & PS/2 keyboard Vcc
+* '-' ↔ Pin 3 (CD32 3-Pin Mini-DIN) & PS/2 keyboard gnd
+* D11 ↔ PS2 keyboard data line
+* SCL ↔ PS2 keyboard clock line
+* SDA & anode schottky (SD2) ↔ Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
 * D10 to cathode schottky (SD1)
 * D9 to cathode schottky (SD2)
-* RX & anode schottky (SD1) <-> Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
+* RX & anode schottky (SD1) ↔ Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
 * D10 pull up to vcc with a 4k7
 * SDA pull up to vcc with a 4k7
 
