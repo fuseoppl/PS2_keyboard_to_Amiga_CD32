@@ -41,7 +41,7 @@
 const uint16_t    clockDelayFalling  = 10;  //us
 const uint16_t    clockLowTime       = 20;  //us
 const uint16_t    clockDelayRising   = 30;  //us
-const uint16_t    maxWaitForACK      = 144; //ms
+const uint16_t    maxWaitForACK      = 200; //ms 144
 unsigned long     keySentTime        = 0;   //ms
 const uint16_t    powerUpKeyStream   = 0xFD;
 const uint16_t    terminateKeyStream = 0xFE;
@@ -73,7 +73,7 @@ void setup()
   digitalWrite(KDAT, HIGH);
   digitalWrite(LED, HIGH);
 
-  #if defined(SERIALDEBUGGER || ISR1DEBUGGER)
+  #if defined(SERIALDEBUGGER) || defined (ISR1DEBUGGER)
   Serial.begin(250000);
   #endif
 
