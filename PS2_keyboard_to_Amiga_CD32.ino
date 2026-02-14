@@ -38,10 +38,10 @@
 #define KCLKLOW    0 // RX & 4k7 (pullup to vcc) & anode schottky (SD1)     <-> Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
 #define LED       13 //                                                      -> PS2 keyboard CapsLock LED
 
-const uint16_t    clockDelayFalling  = 10;  //us
-const uint16_t    clockLowTime       = 20;  //us
-const uint16_t    clockDelayRising   = 30;  //us
-const uint16_t    maxWaitForACK      = 200; //ms 144
+const uint16_t    clockDelayFalling  = 10;  //us 10
+const uint16_t    clockLowTime       = 10;  //us 20
+const uint16_t    clockDelayRising   = 20;  //us 30
+const uint16_t    maxWaitForACK      = 144; //ms 144
 unsigned long     keySentTime        = 0;   //ms
 const uint16_t    powerUpKeyStream   = 0xFD;
 const uint16_t    terminateKeyStream = 0xFE;
