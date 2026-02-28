@@ -18,6 +18,7 @@
 #define NOREPEATALL //The Amiga itself repeats the last key until this one is received with the "released" flag
 //#define SERIALDEBUGGER
 //#define ISR1DEBUGGER
+//#define ISR2DEBUGGER
 //#define NOACKDEBUGGER
 
 //DFRobot Beetle Board - compatible with Arduino Leonardo.
@@ -38,11 +39,12 @@
 #define KCLKLOW    0 // RX & 4k7 (pullup to vcc) & anode schottky (SD1)     <-> Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
 #define LED       13 //                                                      -> PS2 keyboard CapsLock LED
 
-const uint16_t    clockDelayFalling  = 10;  //us 10
-const uint16_t    clockLowTime       = 10;  //us 20
-const uint16_t    clockDelayRising   = 20;  //us 30
-const uint16_t    maxWaitForACK      = 144; //ms 144
+const uint16_t    clockDelayFalling  = 5;  //us 10
+const uint16_t    clockLowTime       = 5;  //us 20
+const uint16_t    clockDelayRising   = 10;  //us 30
+const uint16_t    maxWaitForACK      = 300; //ms 144
 unsigned long     keySentTime        = 0;   //ms
+unsigned long     resetFromAmigaTime = 0;   //ms
 const uint16_t    powerUpKeyStream   = 0xFD;
 const uint16_t    terminateKeyStream = 0xFE;
 const uint16_t    lostSyncCode       = 0xF9;
@@ -190,7 +192,7 @@ void loop( )
       if (keyNr == PS2_KEY_CAPS)
       {
         //Freezes the keyboard when CapsLock pressed too often!
-        /*
+        
         if (upDownFlag == 0) 
         { 
           keyboard.setLock(4); //CapsLock LED ON
@@ -199,9 +201,11 @@ void loop( )
         {
           keyboard.setLock(0); //CapsLock LED OFF
         }
-        */
+
+        delay(100);
+        
         // instead of the keyboard LED, we will use the Beetle LED
-        digitalWrite(LED, !upDownFlag);
+        //digitalWrite(LED, !upDownFlag);
       }
 
       if (keyNr == 0x70) keyNr = 0;
@@ -293,6 +297,10 @@ void ResetAmiga(bool resetRequest)
 void ISR1()
 {
   detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
+  #if defined(ISR1DEBUGGER)
+    Serial.println("HANDSHAKE");
+    Serial.flush();
+  #endif
 
   wdt_reset();
   wdt_enable(WDTO_1S);
@@ -300,16 +308,31 @@ void ISR1()
   wdt_disable();
 
   amigaACK = true;
-
-  #if defined(ISR1DEBUGGER)      
-  Serial.println("ISR1");
-  #endif
 }
 
 void ISR2() //incoming RESET_FROM_AMIGA
 {
-  noInterrupts();
-  wdt_reset();
-  wdt_enable(WDTO_15MS);
-  while (1) {}
+  detachInterrupt(digitalPinToInterrupt(KCLKLOW));
+  detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
+
+  resetFromAmigaTime = millis();
+
+  int resetTimeCounter = 0;
+
+  while (digitalRead(KCLKLOW) == 0) 
+  {
+    delay(1);
+    resetTimeCounter ++;
+  }
+
+  if (resetTimeCounter > 100)
+  {
+    wdt_reset();
+    wdt_enable(WDTO_15MS);
+    while (1) {}
+  }
+
+  attachInterrupt(digitalPinToInterrupt(HANDSHAKE), ISR1, LOW);
+  attachInterrupt(digitalPinToInterrupt(KCLKLOW), ISR2, LOW);  
 }
+
