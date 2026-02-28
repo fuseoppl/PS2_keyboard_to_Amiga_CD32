@@ -37,5 +37,6 @@ Beetle Board ↔ Amiga, PS/2 keyboard
 * RX & anode schottky (SD1) ↔ Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
 * D10 pull up to vcc with a 4k7
 * SDA pull up to vcc with a 4k7
+* SDA decoupling with 100pF capacitor to ground
 
 ![schema](https://github.com/fuseoppl/PS2_keyboard_to_Amiga_CD32/blob/master/PS2keyboardToCD32.png)
