@@ -11,7 +11,7 @@ Keys info:
 * ctrl + alt + home = reset keyboard
 * ctrl + alt + delete = hard reset Amiga
 
-To do (this is not required for normal use):
+To do (not required):
 * add Amiga "soft reset".
 * add ERROR code after resync (except resync after start) and send last known key code.
 
@@ -22,9 +22,6 @@ The project used a modified library: https://github.com/techpaul/PS2KeyAdvanced
 You need:
 * two 4k7 resistors
 * two diodes with a very low voltage drop, maximum 0.3V (eg.: BAS85-GS08).
-
-CapsLock LED:
-* unsolder the LED on the Beetle, cut off the CapsLock LED from the keyboard board and connect it to the Beetle LED pads.
 
 Beetle Board ↔ Amiga, PS/2 keyboard
 * '+' ↔ Pin 4 (CD32 6-Pin Mini-DIN) & PS/2 keyboard Vcc

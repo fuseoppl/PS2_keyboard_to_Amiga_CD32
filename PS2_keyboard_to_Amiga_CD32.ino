@@ -5,7 +5,7 @@
 //ctrl + alt + home   = reset keyboard
 //ctrl + alt + delete = hard reset Amiga
 
-//To do:
+//To do (not required):
 //add Amiga "soft reset".
 //add ERROR code after resync (except resync after start) and send last known key code.
 
@@ -39,10 +39,10 @@
 #define KCLKLOW    0 // RX & 4k7 (pullup to vcc) & anode schottky (SD1)     <-> Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
 #define LED       13 //                                                      -> PS2 keyboard CapsLock LED
 
-const uint16_t    clockDelayFalling  = 5;  //us 10
-const uint16_t    clockLowTime       = 5;  //us 20
-const uint16_t    clockDelayRising   = 10;  //us 30
-const uint16_t    maxWaitForACK      = 300; //ms 144
+const uint16_t    clockDelayFalling  = 5;   //us
+const uint16_t    clockLowTime       = 5;   //us
+const uint16_t    clockDelayRising   = 10;  //us
+const uint16_t    maxWaitForACK      = 300; //ms
 unsigned long     keySentTime        = 0;   //ms
 unsigned long     resetFromAmigaTime = 0;   //ms
 const uint16_t    powerUpKeyStream   = 0xFD;
@@ -190,9 +190,7 @@ void loop( )
       uint16_t keyNr = keystroke & 0xFF;
 
       if (keyNr == PS2_KEY_CAPS)
-      {
-        //Freezes the keyboard when CapsLock pressed too often!
-        
+      { 
         if (upDownFlag == 0) 
         { 
           keyboard.setLock(4); //CapsLock LED ON
@@ -202,9 +200,9 @@ void loop( )
           keyboard.setLock(0); //CapsLock LED OFF
         }
 
-        delay(100);
+        delay(100); //needed to prevent the keyboard from freezing when the CapsLock key is pressed quickly and frequently
         
-        // instead of the keyboard LED, we will use the Beetle LED
+        //Instead of the keyboard LED, we can also use the Beetle LED
         //digitalWrite(LED, !upDownFlag);
       }
 
