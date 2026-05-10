@@ -161,7 +161,7 @@ void setup()
 
 void loop( )
 {
-#if defined(NOACKDEBUGGER) 
+#if defined(NOACKDEBUGGER)
   amigaACK = true;
 #endif
 
@@ -229,9 +229,9 @@ void loop( )
           keyboard.setLock(0); //CapsLock LED OFF
         }
 
-        delay(100); //needed to prevent the keyboard from freezing when the CapsLock key is pressed quickly and frequently
+        delay(100); // needed to prevent the keyboard from freezing when the CapsLock key is pressed quickly and frequently
         
-        //Instead of the keyboard LED, we can also use the Beetle LED
+        // Instead of the keyboard LED, we can also use the Beetle LED
         //digitalWrite(LED, !upDownFlag);
       }
 
@@ -334,12 +334,12 @@ void ResetAmiga(bool resetRequest)
     bitClear(PCMSK0, PCINT1);  // Enable D9 HANDSHAKE
   #endif
 
-  bool _resetRequest = resetRequest;  //use this in the future for Amiga "soft reset"
+  bool _resetRequest = resetRequest;  // use this in the future for Amiga "soft reset"
 
-  //AMIGA HARD RESET
+  // AMIGA HARD RESET
   digitalWrite(KCLK, LOW);
   delay(500);
-  //KEYBOARD HARD RESET
+  // KEYBOARD HARD RESET
   wdt_reset();
   wdt_enable(WDTO_15MS);
   while (1) {}
@@ -362,7 +362,7 @@ void ResetAmiga(bool resetRequest)
     amigaACK = true;
   }
 
-  void ISR2() //incoming RESET_FROM_AMIGA
+  void ISR2() // incoming RESET_FROM_AMIGA
   {
     detachInterrupt(digitalPinToInterrupt(KCLKLOW));
     detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
@@ -389,7 +389,7 @@ void ResetAmiga(bool resetRequest)
   }
 #else
   // KCLKLOW incoming RESET_FROM_AMIGA
-  ISR(PCINT2_vect) { // grupa dla portu D: D0-D7
+  ISR(PCINT2_vect) { // port D: D0-D7
 
     if (!bitRead(PIND,7)) {
       bitClear(PCMSK2, PCINT23); // Disable D7 KCLKLOW
@@ -417,7 +417,7 @@ void ResetAmiga(bool resetRequest)
   }
 
   // HANDSHAKE
-  ISR(PCINT0_vect) { //grupa dla portu B: D8-D13 
+  ISR(PCINT0_vect) { // port B: D8-D13 
 
     if (!bitRead(PINB,1)) {
       bitClear(PCMSK0, PCINT1);  // Disable D9 HANDSHAKE
