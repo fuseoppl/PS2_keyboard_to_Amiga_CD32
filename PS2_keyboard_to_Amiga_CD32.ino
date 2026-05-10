@@ -1,7 +1,9 @@
-//PS2 to Amiga keyboard translator v 1.0 (tested on CD32)
+//PS2 to Amiga CD32 keyboard translator v 1.3
 //Keyboard: Perixx, Model No.:PERIBOARD-409, Part No.:TK525P
-//Left GUI (Windows key) = Left Amiga
-//Menu key = Right Amiga
+//Keyboard: NEW3P, Model No.:AC-59
+//Left GUI (Windows key) = Left Amiga key
+//Menu key = Right Amiga key
+//Home key = Help key
 //ctrl + alt + home   = reset keyboard
 //ctrl + alt + delete = hard reset Amiga
 
@@ -15,30 +17,39 @@
 //keep the library files directly in the sketch directory
 #include "PS2KeyAdvanced.h"
 
+//#define ATMEGA32 //uncomment for ATmega32, comment for ATmega328P
 #define NOREPEATALL //The Amiga itself repeats the last key until this one is received with the "released" flag
 //#define SERIALDEBUGGER
 //#define ISR1DEBUGGER
 //#define ISR2DEBUGGER
 //#define NOACKDEBUGGER
 
-//DFRobot Beetle Board - compatible with Arduino Leonardo.
 //You need two 4k7 resistors
 //and two diodes with a very low voltage drop, maximum 0.3V (eg.: BAS85-GS08).
-//CapsLock LED:
-//Unsolder the LED on the Beetle,
-//cut off the CapsLock LED from the keyboard board
-//and connect it to the Beetle LED pads.
-                     //Beetle Board                                            CD32, PS2 keyboard
-                     // +                                                  <- Pin 4 (Amiga 6-Pin Mini-DIN) & PS2 keyboard Vcc
-                     // -                                                  <-> Pin 3 (Amiga 3-Pin Mini-DIN) & PS2 keyboard gnd
-#define DATAPIN   11 // D11                                                <-> PS2 keyboard data line
-#define IRQPIN     3 // SCL                                                <-> PS2 keyboard clock line
-#define HANDSHAKE  2 // SDA & 4k7 (pullup to vcc) & anode schottky (SD2)   <-> Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
-#define KCLK      10 // D10 to cathode schottky (SD1)
-#define KDAT       9 // D9 to cathode schottky (SD2)
-#define KCLKLOW    0 // RX & 4k7 (pullup to vcc) & anode schottky (SD1)     <-> Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
-#define LED       13 //                                                      -> PS2 keyboard CapsLock LED
 
+//Arduino Leonardo
+//DFRobot Beetle Board - compatible with Arduino Leonardo.
+                           // +                                                <-  Pin 4 (Amiga 6-Pin Mini-DIN) & PS2 keyboard Vcc
+                           // -                                                <-> Pin 3 (Amiga 3-Pin Mini-DIN) & PS2 keyboard gnd
+#if defined(ATMEGA32)
+  #define DATAPIN   11 //     D11                                              <-> PS2 keyboard data line
+  #define IRQPIN     3 // int SCL                                              <-> PS2 keyboard clock line
+  #define HANDSHAKE  2 // int SDA & 4k7 (pullup to vcc) & anode schottky (SD2) <-> Pin 1 (CD32 keyboard Mini-DIN) keyboard data line
+  #define KCLK      10 //     D10 to cathode schottky (SD1)
+  #define KDAT       9 //     D9 to cathode schottky (SD2)
+  #define KCLKLOW    0 // int RX & 4k7 (pullup to vcc) & anode schottky (SD1)  <-> Pin 5 (CD32 keyboard Mini-DIN) keyboard clock line
+  #define LED       13 //                                                       -> PS2 keyboard CapsLock LED
+#else
+//Arduino UNO nano
+//mini ultra, china clone https://pl.aliexpress.com/item/1005007492500542.html select Tools->Processor->ATmega328P (Old Bootloader)
+  #define DATAPIN    5 //     D5                                               <-> PS2 keyboard data line
+  #define IRQPIN     3 // int D3                                               <-> PS2 keyboard clock line
+  #define KCLK       8 //     D8 to cathode schottky (SD1)
+  #define KCLKLOW    7 // int D7 & 4k7 (pullup to vcc) & anode schottky (SD1)  <-> Pin 5 (CD32 keyboard Mini-DIN) keyboard clock line
+  #define KDAT      10 //     D10 to cathode schottky (SD2)
+  #define HANDSHAKE  9 // int D9 & 4k7 (pullup to vcc) & anode schottky (SD2)  <-> Pin 1 (CD32 keyboard Mini-DIN) keyboard data line
+  #define LED        4 //     D4                                                -> PS2 keyboard CapsLock LED
+#endif
 const uint16_t    clockDelayFalling  = 5;   //us
 const uint16_t    clockLowTime       = 5;   //us
 const uint16_t    clockDelayRising   = 10;  //us
@@ -58,26 +69,35 @@ volatile uint8_t  ledState           = 0;
 volatile uint16_t codeToSend         = 0;
 uint16_t          lastCode           = 0;
 
+const char* firmwareRevision         = "1.3";
 PS2KeyAdvanced keyboard;
 
 void setup()
 {
+  pinMode(KCLKLOW,   INPUT_PULLUP);
+  pinMode(HANDSHAKE, INPUT_PULLUP);
+  pinMode(IRQPIN,    INPUT_PULLUP);
+  pinMode(KCLK,      OUTPUT);
+  pinMode(KDAT,      OUTPUT);
+  pinMode(LED,       OUTPUT);
+
+#if defined(ATMEGA32)
   detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
   detachInterrupt(digitalPinToInterrupt(KCLKLOW));
-
-  pinMode(HANDSHAKE, INPUT_PULLUP);
-  pinMode(KCLKLOW, INPUT_PULLUP);
-  pinMode(KCLK, OUTPUT);
-  pinMode(KDAT, OUTPUT);
-  pinMode(LED, OUTPUT);
+#else
+  bitSet(PCICR, PCIE2);      // Enable PCINT for D port
+  bitClear(PCMSK2, PCINT23); // Disable D7 KCLKLOW
+  bitSet(PCICR, PCIE0);      // Enable PCINT for B port
+  bitClear(PCMSK0, PCINT1);  // Disable D9 HANDSHAKE
+#endif
 
   digitalWrite(KCLK, HIGH);
   digitalWrite(KDAT, HIGH);
-  digitalWrite(LED, HIGH);
+  digitalWrite(LED,  HIGH);
 
-  #if defined(SERIALDEBUGGER) || defined (ISR1DEBUGGER)
+#if defined(SERIALDEBUGGER) || defined (ISR1DEBUGGER)
   Serial.begin(250000);
-  #endif
+#endif
 
   keyboard.begin(DATAPIN, IRQPIN);
 
@@ -89,61 +109,70 @@ void setup()
 
     if((keystroke & 0xFF) == PS2_KEY_ECHO || (keystroke & 0xFF) == PS2_KEY_BAT)
     {
-      #if defined(SERIALDEBUGGER)
+    #if defined(SERIALDEBUGGER)
       Serial.println("OK_KEYBOARD");
       Serial.flush();
-      #endif
+    #endif
       internalTestPassed = true;
     }
     else if((keystroke & 0xFF) == 0)
     {
-        #if defined(SERIALDEBUGGER)
-        Serial.println("NO_KEYBOARD");
-        Serial.flush();
-        #endif
+    #if defined(SERIALDEBUGGER)
+      Serial.println("NO_KEYBOARD");
+      Serial.flush();
+    #endif
     }
     else
     {
-      #if defined(SERIALDEBUGGER)
+    #if defined(SERIALDEBUGGER)
       Serial.print("INVALID_CODE:0x");
       Serial.println(keystroke, HEX);
       Serial.flush();
-      #endif
+    #endif
     }
   }
 
   keyboard.setNoRepeat(1);
   delay(6);
   
-  #if defined(SERIALDEBUGGER)
+#if defined(SERIALDEBUGGER)
+  Serial.print("VER:");
+  Serial.println(firmwareRevision);
   Serial.println("INIT_END");
   Serial.flush();
-  #endif
+#endif
 
   digitalWrite(LED, LOW);
 
   wdt_reset();
   wdt_enable(WDTO_1S);
-  while (digitalRead(KCLKLOW) == 0) 
-  {
-    delay(1);
-  }
+  while (digitalRead(KCLKLOW) == 0) {delay(1);}
   wdt_reset();
   wdt_disable();
 
-  EIFR |= (1<<INTF2);
+#if defined(ATMEGA32)
   attachInterrupt(digitalPinToInterrupt(KCLKLOW), ISR2, LOW);
+#else
+  bitSet(PCMSK2, PCINT23); // Enable D7 KCLKLOW
+#endif
+
+  sei();
 }
 
 void loop( )
 {
-  #if defined(NOACKDEBUGGER) 
+#if defined(NOACKDEBUGGER) 
   amigaACK = true;
-  #endif
+#endif
 
   if (!amigaACK && millis() > keySentTime + maxWaitForACK)
   {
+  #if defined(ATMEGA32)
     detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
+  #else
+    bitClear(PCMSK0, PCINT1);  // Disable D9 HANDSHAKE
+  #endif
+
     reSyncInProgress = true;
     reSyncFinal      = false;
     Resync();
@@ -230,8 +259,14 @@ void loop( )
 
 void SendKeyToAmiga(uint16_t keyNrToSend)
 {
-  detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
-  detachInterrupt(digitalPinToInterrupt(KCLKLOW));
+  #if defined(ATMEGA32)
+    detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
+    detachInterrupt(digitalPinToInterrupt(KCLKLOW));
+  #else
+    bitClear(PCMSK2, PCINT23); // Disable D7 KCLKLOW
+    bitClear(PCMSK0, PCINT1);  // Disable D9 HANDSHAKE
+  #endif
+
   uint16_t keyNrToSendInverted = ~keyNrToSend;
   amigaACK = false;
   keySentTime = millis();
@@ -248,16 +283,25 @@ void SendKeyToAmiga(uint16_t keyNrToSend)
   digitalWrite(KDAT, HIGH);
   delayMicroseconds(clockLowTime);
 
-  EIFR |= (1<<INTF1);
-  EIFR |= (1<<INTF2);
-  attachInterrupt(digitalPinToInterrupt(HANDSHAKE), ISR1, LOW);
-  attachInterrupt(digitalPinToInterrupt(KCLKLOW), ISR2, LOW);
+  #if defined(ATMEGA32)
+    attachInterrupt(digitalPinToInterrupt(HANDSHAKE), ISR1, LOW);
+    attachInterrupt(digitalPinToInterrupt(KCLKLOW), ISR2, LOW);
+  #else
+    bitSet(PCMSK2, PCINT23); // Enable D7 KCLKLOW
+    bitSet(PCMSK0, PCINT1);  // Enable D9 HANDSHAKE
+  #endif
 }
 
 void Resync()
 {
-  detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
-  detachInterrupt(digitalPinToInterrupt(KCLKLOW));
+  #if defined(ATMEGA32)
+    detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
+    detachInterrupt(digitalPinToInterrupt(KCLKLOW));
+  #else
+    bitClear(PCMSK2, PCINT23); // Disable D7 KCLKLOW
+    bitClear(PCMSK0, PCINT1);  // Disable D9 HANDSHAKE
+  #endif
+
   ledState = ~ledState;
   digitalWrite(LED, ledState);
   amigaACK = false;
@@ -271,16 +315,25 @@ void Resync()
   digitalWrite(KDAT, HIGH);
   delayMicroseconds(clockLowTime);
   
-  EIFR |= (1<<INTF1);
-  EIFR |= (1<<INTF2);
-  attachInterrupt(digitalPinToInterrupt(HANDSHAKE), ISR1, LOW);
-  attachInterrupt(digitalPinToInterrupt(KCLKLOW), ISR2, LOW);
+  #if defined(ATMEGA32)
+    attachInterrupt(digitalPinToInterrupt(HANDSHAKE), ISR1, LOW);
+    attachInterrupt(digitalPinToInterrupt(KCLKLOW), ISR2, LOW);
+  #else
+    bitSet(PCMSK2, PCINT23); // Enable D7 KCLKLOW
+    bitSet(PCMSK0, PCINT1);  // Enable D9 HANDSHAKE
+  #endif
 }
 
 void ResetAmiga(bool resetRequest)
 {
-  detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
-  detachInterrupt(digitalPinToInterrupt(KCLKLOW));
+  #if defined(ATMEGA32)
+    detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
+    detachInterrupt(digitalPinToInterrupt(KCLKLOW));
+  #else
+    bitClear(PCMSK2, PCINT23); // Enable D7 KCLKLOW
+    bitClear(PCMSK0, PCINT1);  // Enable D9 HANDSHAKE
+  #endif
+
   bool _resetRequest = resetRequest;  //use this in the future for Amiga "soft reset"
 
   //AMIGA HARD RESET
@@ -292,45 +345,94 @@ void ResetAmiga(bool resetRequest)
   while (1) {}
 }
 
-void ISR1()
-{
-  detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
-  #if defined(ISR1DEBUGGER)
-    Serial.println("HANDSHAKE");
-    Serial.flush();
-  #endif
-
-  wdt_reset();
-  wdt_enable(WDTO_1S);
-  while (digitalRead(HANDSHAKE) == 0) {}
-  wdt_disable();
-
-  amigaACK = true;
-}
-
-void ISR2() //incoming RESET_FROM_AMIGA
-{
-  detachInterrupt(digitalPinToInterrupt(KCLKLOW));
-  detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
-
-  resetFromAmigaTime = millis();
-
-  int resetTimeCounter = 0;
-
-  while (digitalRead(KCLKLOW) == 0) 
+#if defined(ATMEGA32)
+  void ISR1()
   {
-    delay(1);
-    resetTimeCounter ++;
-  }
+    detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
+    #if defined(ISR1DEBUGGER)
+      Serial.println("HANDSHAKE");
+      Serial.flush();
+    #endif
 
-  if (resetTimeCounter > 100)
-  {
     wdt_reset();
-    wdt_enable(WDTO_15MS);
-    while (1) {}
+    wdt_enable(WDTO_1S);
+    while (digitalRead(HANDSHAKE) == 0) {}
+    wdt_disable();
+
+    amigaACK = true;
   }
 
-  attachInterrupt(digitalPinToInterrupt(HANDSHAKE), ISR1, LOW);
-  attachInterrupt(digitalPinToInterrupt(KCLKLOW), ISR2, LOW);  
-}
+  void ISR2() //incoming RESET_FROM_AMIGA
+  {
+    detachInterrupt(digitalPinToInterrupt(KCLKLOW));
+    detachInterrupt(digitalPinToInterrupt(HANDSHAKE));
 
+    resetFromAmigaTime = millis();
+
+    int resetTimeCounter = 0;
+
+    while (digitalRead(KCLKLOW) == 0) 
+    {
+      delay(1);
+      resetTimeCounter ++;
+    }
+
+    if (resetTimeCounter > 100)
+    {
+      wdt_reset();
+      wdt_enable(WDTO_15MS);
+      while (1) {}
+    }
+
+    attachInterrupt(digitalPinToInterrupt(HANDSHAKE), ISR1, LOW);
+    attachInterrupt(digitalPinToInterrupt(KCLKLOW), ISR2, LOW);  
+  }
+#else
+  // KCLKLOW incoming RESET_FROM_AMIGA
+  ISR(PCINT2_vect) { // grupa dla portu D: D0-D7
+
+    if (!bitRead(PIND,7)) {
+      bitClear(PCMSK2, PCINT23); // Disable D7 KCLKLOW
+      bitClear(PCMSK0, PCINT1);  // Disable D9 HANDSHAKE
+      resetFromAmigaTime = millis();
+
+      int resetTimeCounter = 0;
+
+      while (digitalRead(KCLKLOW) == 0) 
+      {
+        delay(1);
+        resetTimeCounter ++;
+      }
+
+      if (resetTimeCounter > 100)
+      {
+        wdt_reset();
+        wdt_enable(WDTO_15MS);
+        while (1) {}
+      }
+
+      bitSet(PCMSK2, PCINT23); // Enable D7 KCLKLOW
+      bitSet(PCMSK0, PCINT1);  // Enable D9 HANDSHAKE
+    }
+  }
+
+  // HANDSHAKE
+  ISR(PCINT0_vect) { //grupa dla portu B: D8-D13 
+
+    if (!bitRead(PINB,1)) {
+      bitClear(PCMSK0, PCINT1);  // Disable D9 HANDSHAKE
+
+      #if defined(ISR1DEBUGGER)
+        Serial.println("HANDSHAKE");
+        Serial.flush();
+      #endif
+
+      wdt_reset();
+      wdt_enable(WDTO_1S);
+      while (digitalRead(HANDSHAKE) == 0) {}
+      wdt_disable();
+
+      amigaACK = true;
+    }
+  }
+#endif
