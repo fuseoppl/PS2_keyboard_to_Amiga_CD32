@@ -48,5 +48,8 @@ mini ultra, china clone https://pl.aliexpress.com/item/1005007492500542.html sel
 * D10 to cathode schottky (SD2)
 * D9 & 4k7 (pullup to vcc) & anode schottky (SD2) ↔ Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
 
+DFRobot Beetle Board
 ![schema 1](https://github.com/fuseoppl/PS2_keyboard_to_Amiga_CD32/blob/master/PS2keyboardToCD32.png)
+
+NEW3P, Model No.:AC-59 and mini ultra (china Arduino UNO nano clone)
 ![schema 2](https://github.com/fuseoppl/PS2_keyboard_to_Amiga_CD32/blob/master/PS2keyboardToCD32_AC59.jpg)
