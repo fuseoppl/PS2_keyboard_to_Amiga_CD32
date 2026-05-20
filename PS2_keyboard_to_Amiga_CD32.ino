@@ -27,7 +27,6 @@
 //You need two 4k7 resistors
 //and two diodes with a very low voltage drop, maximum 0.3V (eg.: BAS85-GS08).
 
-//Arduino Leonardo
 //DFRobot Beetle Board - compatible with Arduino Leonardo.
                            // +                                                <-  Pin 4 (Amiga 6-Pin Mini-DIN) & PS2 keyboard Vcc
                            // -                                                <-> Pin 3 (Amiga 3-Pin Mini-DIN) & PS2 keyboard gnd
@@ -40,8 +39,8 @@
   #define KCLKLOW    0 // int RX & 4k7 (pullup to vcc) & anode schottky (SD1)  <-> Pin 5 (CD32 keyboard Mini-DIN) keyboard clock line
   #define LED       13 //                                                       -> PS2 keyboard CapsLock LED
 #else
-//Arduino UNO nano
-//mini ultra, china clone https://pl.aliexpress.com/item/1005007492500542.html select Tools->Processor->ATmega328P (Old Bootloader)
+//mini ultra, china Arduino UNO nano clone https://pl.aliexpress.com/item/1005007492500542.html
+//To avoid watchdog issues, you need to flash a new bootloader!
   #define DATAPIN    5 //     D5                                               <-> PS2 keyboard data line
   #define IRQPIN     3 // int D3                                               <-> PS2 keyboard clock line
   #define KCLK       8 //     D8 to cathode schottky (SD1)
@@ -96,7 +95,7 @@ void setup()
   digitalWrite(LED,  HIGH);
 
 #if defined(SERIALDEBUGGER) || defined (ISR1DEBUGGER)
-  Serial.begin(250000);
+  Serial.begin(2000000);
 #endif
 
   keyboard.begin(DATAPIN, IRQPIN);
@@ -144,7 +143,7 @@ void setup()
 
   digitalWrite(LED, LOW);
 
-  wdt_reset();
+  //wdt_reset();
   wdt_enable(WDTO_1S);
   while (digitalRead(KCLKLOW) == 0) {delay(1);}
   wdt_reset();
@@ -340,7 +339,7 @@ void ResetAmiga(bool resetRequest)
   digitalWrite(KCLK, LOW);
   delay(500);
   // KEYBOARD HARD RESET
-  wdt_reset();
+  //wdt_reset();
   wdt_enable(WDTO_15MS);
   while (1) {}
 }
@@ -355,7 +354,7 @@ void ResetAmiga(bool resetRequest)
     #endif
 
     wdt_reset();
-    wdt_enable(WDTO_1S);
+    //wdt_enable(WDTO_1S);
     while (digitalRead(HANDSHAKE) == 0) {}
     wdt_disable();
 
@@ -379,7 +378,7 @@ void ResetAmiga(bool resetRequest)
 
     if (resetTimeCounter > 100)
     {
-      wdt_reset();
+      //wdt_reset();
       wdt_enable(WDTO_15MS);
       while (1) {}
     }
@@ -406,7 +405,7 @@ void ResetAmiga(bool resetRequest)
 
       if (resetTimeCounter > 100)
       {
-        wdt_reset();
+        //wdt_reset();
         wdt_enable(WDTO_15MS);
         while (1) {}
       }
@@ -427,7 +426,7 @@ void ResetAmiga(bool resetRequest)
         Serial.flush();
       #endif
 
-      wdt_reset();
+      //wdt_reset();
       wdt_enable(WDTO_1S);
       while (digitalRead(HANDSHAKE) == 0) {}
       wdt_disable();

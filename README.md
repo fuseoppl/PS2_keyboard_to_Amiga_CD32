@@ -37,7 +37,8 @@ Beetle Board ↔ Amiga, PS/2 keyboard
 * D9 to cathode schottky (SD2)
 * SDA & 4k7 (pullup to vcc) & anode schottky (SD2) ↔ Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
 
-mini ultra, china clone https://pl.aliexpress.com/item/1005007492500542.html select Tools->Processor->ATmega328P (Old Bootloader)
+mini ultra, china clone https://pl.aliexpress.com/item/1005007492500542.html
+select Tools->Processor->ATmega328P (Old Bootloader)
 (//#define ATMEGA32 //comment for ATmega328P)
 * 5V ↔ Pin 4 (CD32 6-Pin Mini-DIN) & PS/2 keyboard Vcc
 * GND ↔ Pin 3 (CD32 3-Pin Mini-DIN) & PS/2 keyboard gnd
