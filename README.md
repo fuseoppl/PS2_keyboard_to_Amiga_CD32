@@ -32,22 +32,22 @@ Beetle Board ↔ Amiga, PS/2 keyboard
 * '-' ↔ Pin 3 (CD32 3-Pin Mini-DIN) & PS/2 keyboard gnd
 * D11 ↔ PS2 keyboard data line
 * SCL ↔ PS2 keyboard clock line
-* D10 to cathode schottky (SD1)
-* RX & 4k7 (pullup to vcc) & anode schottky (SD1) ↔ Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
-* D9 to cathode schottky (SD2)
-* SDA & 4k7 (pullup to vcc) & anode schottky (SD2) ↔ Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
+* D10 to cathode schottky (D1)
+* RX & 4k7 (pullup to vcc) & anode schottky (D1) ↔ Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
+* D9 to cathode schottky (D2)
+* SDA & 4k7 (pullup to vcc) & anode schottky (D2) ↔ Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
 
 mini ultra, china clone https://pl.aliexpress.com/item/1005007492500542.html
-select Tools->Processor->ATmega328P (Old Bootloader)
+To avoid watchdog issues, you need to flash a new bootloader!
 (//#define ATMEGA32 //comment for ATmega328P)
 * 5V ↔ Pin 4 (CD32 6-Pin Mini-DIN) & PS/2 keyboard Vcc
 * GND ↔ Pin 3 (CD32 3-Pin Mini-DIN) & PS/2 keyboard gnd
 * D5 ↔ PS2 keyboard data line
 * D3 ↔ PS2 keyboard clock line
-* D8 to cathode schottky (SD1)
-* D7 & 4k7 (pullup to vcc) & anode schottky (SD1) ↔ Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
-* D10 to cathode schottky (SD2)
-* D9 & 4k7 (pullup to vcc) & anode schottky (SD2) ↔ Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
+* D8 to cathode schottky (D1)
+* D7 & 4k7 (pullup to vcc) & anode schottky (D1) ↔ Pin 5 (CD32 6-Pin Mini-DIN) keyboard clock line
+* D10 to cathode schottky (D2)
+* D9 & 4k7 (pullup to vcc) & anode schottky (D2) ↔ Pin 1 (CD32 6-Pin Mini-DIN) keyboard data line
 
 DFRobot Beetle Board
 ![schema 1](https://github.com/fuseoppl/PS2_keyboard_to_Amiga_CD32/blob/master/PS2keyboardToCD32.png)
